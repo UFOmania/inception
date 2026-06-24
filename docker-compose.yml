@@ -1,0 +1,40 @@
+services:
+  maria:
+    container_name: maria
+    build: ./requirements/mariadb
+    image: db:db
+    networks:
+      - MyNet
+    volumes:
+      - maria-vol:/var/lib/mysql
+
+  wordpress:
+    container_name: wordpress
+    build: ./requirements/wordpress
+    image: wp:wp
+    networks:
+      - MyNet
+    volumes:
+      - wp-vol:/var/www/html
+    depends_on:
+      - maria
+
+  nginx:
+    container_name: nginx
+    build: ./requirements/nginx
+    image: nginx:nginx
+    ports:
+      - "443:443"
+    networks:
+      - MyNet
+    volumes:
+      - wp-vol:/var/www/html
+    depends_on:
+      - wordpress
+
+networks:
+  MyNet:
+
+volumes:
+  wp-vol:
+  maria-vol:
