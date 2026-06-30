@@ -1,23 +1,21 @@
-
 all:
-	@docker compose up --build
-
+	@mkdir -p /home/${USER}/data/mariadb
+	@mkdir -p /home/${USER}/data/wordpress
+	@docker compose -f ./srcs/docker-compose.yml up --build
 
 down:
-	@docker compose down
+	@docker compose -f ./srcs/docker-compose.yml  down
 
 
 clean:
-	@docker compose  down --rmi all -v
+	@echo "Stopping containers and removing volumes..."
+	@docker compose -f ./srcs/docker-compose.yml   down --rmi all -v
 
 fclean:
-	@echo "Stopping containers and removing volumes..."
-	@docker compose down --rmi all -v
 	@echo "Cleaning system and orphan volumes..."
 	@docker system prune -af --volumes
+	@sudo rm -rf /home/massrayb/data/
 	@echo "Full cleanup complete."
 
 
 re: fclean all
-
-.PHONY: all down clean fclean re

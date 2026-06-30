@@ -1,0 +1,85 @@
+services:
+  mariadb:
+    container_name: mariadb
+    build: requirements/mariadb/.
+    image: mariadb:mariadb
+    networks:
+      - myNet
+    volumes:
+      - mariadb_vol:/var/lib/mysql
+    environment:
+      - DB_NAME=${WP_DB_NAME}
+      - DB_USER=${DB_USER}
+    secrets:
+      - DB_USER_PASS
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "3306"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+    
+
+  wordpress:
+    container_name: wordpress
+    build: requirements/wordpress/.
+    image: wordpress:wordpress
+    networks:
+      - myNet
+    volumes:
+      - wordpress_vol:/var/www/html
+    environment:
+      - WP_DB_NAME=${WP_DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - WP_URL=${WP_URL}
+      - WP_TITLE=${WP_TITLE}
+      - WP_ADMIN_USER=${WP_ADMIN_USER}
+      - WP_ADMIN_EMAIL=${WP_ADMIN_EMAIL}
+    secrets:
+      - WP_ADMIN_PASS
+      - DB_USER_PASS
+    depends_on:
+      mariadb:
+        condition: service_healthy
+  
+  nginx:
+    container_name: nginx
+    build: requirements/nginx/.
+    image: nginx:nginx
+    networks:
+      - myNet
+    volumes:
+      - wordpress_vol:/var/www/html
+    depends_on:
+      wordpress:
+        condition: service_started
+    ports:
+      - 443:443
+
+
+
+networks:
+  myNet:
+
+volumes:
+  mariadb_vol:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/massrayb/data/mariadb
+      o: bind
+
+  wordpress_vol:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/massrayb/data/wordpress
+      o: bind
+
+secrets:
+  DB_USER_PASS:
+    file: ../secrect/DB_USER_PASSWORD
+  WP_ADMIN_PASS:
+    file: ../secrect/WP_ADMIN_PASSWORD
