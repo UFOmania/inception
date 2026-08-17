@@ -6,5 +6,10 @@ COPY ./tools/init.sh ./init.sh
 
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && chmod +x wp-cli.phar && mv wp-cli.phar /usr/local/bin/wp
 
+RUN sed -i "s|listen = 127.0.0.1:9000|listen = 0.0.0.0:9000|" /etc/php84/php-fpm.d/www.conf
 
-CMD ["sh", "init.sh"]
+WORKDIR  /var/www/html
+
+RUN php -d memory_limit=512M  /usr/local/bin/wp core download
+
+CMD ["sh", "/init.sh"]
