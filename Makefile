@@ -1,7 +1,7 @@
 all:
-	mkdir -p /home/massrayb/data/mariadb
-	mkdir -p /home/massrayb/data/wordpress
-	sudo docker compose -f ./srcs/docker-compose.yml up --build
+	@mkdir -p /home/massrayb/data/mariadb
+	@mkdir -p /home/massrayb/data/wordpress
+	@docker compose -f ./srcs/docker-compose.yml up --build
 
 down:
 	@docker compose -f ./srcs/docker-compose.yml  down 
@@ -18,3 +18,5 @@ fclean: clean
 
 
 re: fclean all
+
+.phony: all down clean 
